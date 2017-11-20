@@ -4,6 +4,7 @@ namespace Knp\Component\Pager\Event\Subscriber\Sortable;
 
 use Knp\Component\Pager\Event\ItemsEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -78,8 +79,12 @@ class ArraySubscriber implements EventSubscriberInterface
             throw new \UnexpectedValueException('You need symfony/property-access component to use this sorting function');
         }
 
-        $fieldValue1 = $this->propertyAccessor->getValue($object1, $this->currentSortingField);
-        $fieldValue2 = $this->propertyAccessor->getValue($object2, $this->currentSortingField);
+        try {
+            $fieldValue1 = $this->propertyAccessor->getValue($object1, $this->currentSortingField);
+            $fieldValue2 = $this->propertyAccessor->getValue($object2, $this->currentSortingField);
+        } catch (NoSuchPropertyException $e) {
+            return 0;
+        }
 
         if (is_string($fieldValue1)) {
             $fieldValue1 = mb_strtolower($fieldValue1);
